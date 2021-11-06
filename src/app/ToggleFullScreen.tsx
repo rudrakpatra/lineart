@@ -1,8 +1,8 @@
+import React from "react";
 import Button from "@mui/material/Button";
 import Icon from "@mdi/react";
 import { mdiFullscreen } from "@mdi/js";
 import { mdiFullscreenExit } from "@mdi/js";
-import React from "react";
 
 export default function ToggleFullScreen(props: { canvas: HTMLCanvasElement }) {
   const toggleFullScreen = (canvas: HTMLCanvasElement) => {

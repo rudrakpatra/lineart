@@ -3,25 +3,33 @@ import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 
+import { mdiResize } from "@mdi/js";
 import { mdiLayersTriple } from "@mdi/js";
 import { mdiVectorPolylineEdit } from "@mdi/js";
 import { mdiPalette } from "@mdi/js";
 import { mdiDraw } from "@mdi/js";
+import { mdiSelectionEllipse } from "@mdi/js";
 import Icon from "@mdi/react";
 
 export default function Tools() {
   const items = [
+    new Item(mdiResize, () => {
+      console.log("resize", window.LineArt);
+    }),
     new Item(mdiLayersTriple, () => {
-      console.log("layersTriple");
+      console.log("layers", window.LineArt);
+    }),
+    new Item(mdiSelectionEllipse, () => {
+      console.log("selection", window.LineArt);
     }),
     new Item(mdiVectorPolylineEdit, () => {
-      console.log("polylineEdit");
+      console.log("polylineEdit", window.LineArt);
     }),
     new Item(mdiDraw, () => {
-      console.log("draw");
+      console.log("draw", window.LineArt);
     }),
     new Item(mdiPalette, () => {
-      console.log("palette");
+      console.log("palette", window.LineArt);
     }),
   ];
   return <BasicMenu items={items} />;
