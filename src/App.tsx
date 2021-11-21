@@ -5,8 +5,7 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 import ToggleFullScreen from "./app/ToggleFullScreen";
 import DopeSheet from "./app/components/DopeSheet";
 import { setupLineArt } from "./app/LineArt";
-import { orange } from "@material-ui/core/colors";
-
+import { orange } from "@mui/material/colors";
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 setupLineArt(canvas);
 

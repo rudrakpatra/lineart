@@ -1,4 +1,4 @@
-import { Paper } from "@material-ui/core";
+import Paper from "@mui/material/Paper";
 import paper from "paper";
 import Icon from "@mdi/react";
 import React, { createContext, useEffect, useRef, useState } from "react";
