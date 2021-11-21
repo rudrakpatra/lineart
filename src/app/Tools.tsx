@@ -1,36 +1,42 @@
-import * as React from "react";
+import React, { useState } from "react";
 import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 
+import { mdiDragVariant } from "@mdi/js";
 import { mdiResize } from "@mdi/js";
 import { mdiLayersTriple } from "@mdi/js";
-import { mdiVectorPolylineEdit } from "@mdi/js";
+import { mdiVectorSquareEdit } from "@mdi/js";
+import { mdiVectorBezier } from "@mdi/js";
+
 import { mdiPalette } from "@mdi/js";
 import { mdiDraw } from "@mdi/js";
 import { mdiSelectionEllipse } from "@mdi/js";
 import Icon from "@mdi/react";
+import { theme } from "../App";
+import Draw from "./tools/Draw";
+import Edit from "./tools/Edit";
+import Bezier from "./tools/Bezier";
 
+const draw = new Draw();
+const edit = new Edit();
+const beizer = new Bezier();
 export default function Tools() {
   const items = [
-    new Item(mdiResize, () => {
-      console.log("resize", window.LineArt);
+    new Item(mdiDragVariant, () => {}),
+    new Item(mdiResize, () => {}),
+    new Item(mdiLayersTriple, () => {}),
+    new Item(mdiSelectionEllipse, () => {}),
+    new Item(mdiVectorSquareEdit, () => {
+      edit.activate();
     }),
-    new Item(mdiLayersTriple, () => {
-      console.log("layers", window.LineArt);
-    }),
-    new Item(mdiSelectionEllipse, () => {
-      console.log("selection", window.LineArt);
-    }),
-    new Item(mdiVectorPolylineEdit, () => {
-      console.log("polylineEdit", window.LineArt);
+    new Item(mdiVectorBezier, () => {
+      beizer.activate();
     }),
     new Item(mdiDraw, () => {
-      console.log("draw", window.LineArt);
+      draw.activate();
     }),
-    new Item(mdiPalette, () => {
-      console.log("palette", window.LineArt);
-    }),
+    new Item(mdiPalette, () => {}),
   ];
   return <BasicMenu items={items} />;
 }
@@ -44,8 +50,8 @@ class Item {
 }
 
 function BasicMenu(props: { items: Item[] }) {
-  let [active, setActive] = React.useState(0);
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  let [active, setActive] = useState(0);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const openMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -61,7 +67,10 @@ function BasicMenu(props: { items: Item[] }) {
         aria-controls="basic-menu"
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
-        onClick={openMenu}
+        onClick={(e) => {
+          open ? closeMenu() : openMenu(e);
+        }}
+        color={"primary"}
         variant="contained"
       >
         {props.items[active].icon}
@@ -69,10 +78,22 @@ function BasicMenu(props: { items: Item[] }) {
       <Menu
         id="basic-menu"
         anchorEl={anchorEl}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        transformOrigin={{ vertical: "top", horizontal: "center" }}
         open={open}
+        transitionDuration={100}
         onClose={closeMenu}
+        PaperProps={{
+          style: {
+            background: theme.palette.grey[200],
+          },
+        }}
         MenuListProps={{
           "aria-labelledby": "basic-button",
+          style: {
+            background: theme.palette.grey[200],
+            color: theme.palette.common.black,
+          },
         }}
       >
         {props.items.map((item, index) => (

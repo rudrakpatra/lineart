@@ -7,27 +7,22 @@ import { mdiFullscreenExit } from "@mdi/js";
 export default function ToggleFullScreen(props: { canvas: HTMLCanvasElement }) {
   const toggleFullScreen = (canvas: HTMLCanvasElement) => {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().then(() => {
-        setPath(mdiFullscreenExit);
-        canvas.height = window.screen.height;
-        canvas.width = window.screen.width;
-      });
+      document.documentElement.requestFullscreen();
     } else {
       if (document.exitFullscreen) {
-        document.exitFullscreen().then(() => {
-          setPath(mdiFullscreen);
-          canvas.height = window.innerHeight;
-          canvas.width = window.innerWidth;
-        });
+        document.exitFullscreen();
       }
     }
+    document.documentElement.onfullscreenchange = (ev: Event) => {
+      setPath(document.fullscreenElement ? mdiFullscreenExit : mdiFullscreen);
+    };
   };
   const [path, setPath] = React.useState(
     !document.fullscreenElement ? mdiFullscreen : mdiFullscreenExit
   );
   return (
     <div style={{ position: "fixed", bottom: 10, right: 10 }}>
-      {detectMob() ? (
+      {detectMobile() ? (
         <Button
           id="toggleFullScreenButton"
           onClick={() => toggleFullScreen(props.canvas)}
@@ -41,7 +36,7 @@ export default function ToggleFullScreen(props: { canvas: HTMLCanvasElement }) {
     </div>
   );
 }
-function detectMob() {
+function detectMobile() {
   const toMatch = [
     /Android/i,
     /webOS/i,
