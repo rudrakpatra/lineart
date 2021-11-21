@@ -12,7 +12,6 @@ import {
   mdiRefresh,
   mdiPlusBox,
 } from "@mdi/js";
-import { useDelta, useTimer } from "./AnimationFrame";
 class Metric {
   frame: { height: number; width: number };
   constructor() {
@@ -43,41 +42,10 @@ function DopeSheet() {
   useEffect(() => {
     //console.log(active)
   }, [active]);
-  //dragging & scrolling the frames
-  const dragLast = useRef(0);
-  const scroll_sensitivity = 2;
-  useEffect(() => {
-    if (!playing) {
-      const checkActive = (index: number) => {
-        const left = -(index + 0.5) * metric.frame.width;
-        const right = -(index - 0.5) * metric.frame.width;
-        const rel_x = x - x_max;
-        return rel_x > left && rel_x < right;
-      };
-      const getActive = () => {
-        let new_active = 0;
-        for (let i = 0; i < frames.length; i++) {
-          if (checkActive(i)) {
-            new_active = i;
-            break;
-          }
-        }
-        return new_active;
-      };
-      setActive(getActive());
-    }
-  }, [x, x_max, frames.length]);
-  const handleScrollStart = (e: React.TouchEvent) => {
-    dragLast.current = e.touches[0].clientX;
-  };
-  const handleScrollMove = (e: React.TouchEvent) => {
-    const value =
-      scroll_sensitivity * (x + e.touches[0].clientX - dragLast.current) - x;
-    dragLast.current = e.touches[0].clientX;
-    setx(clamp(value, x_min, x_max));
-  };
+
   //animation
   const [playing, setPlaying] = React.useState(false);
+
   setTimeout(() => {
     if (frames.length > 1) {
       if (playing && (active + 1 < frames.length || loopingAnimation))
@@ -108,6 +76,41 @@ function DopeSheet() {
       activeFrame.set({ visible: true, opacity: 1 });
     }
   }, [active, onionSkin, loopingAnimation, frames]);
+
+  //dragging & scrolling the frames
+  const dragLast = useRef(0);
+  const scroll_sensitivity = 2;
+
+  const handleScrollStart = (e: React.TouchEvent) => {
+    dragLast.current = e.touches[0].clientX;
+  };
+  const handleScrollMove = (e: React.TouchEvent) => {
+    const value =
+      scroll_sensitivity * (x + e.touches[0].clientX - dragLast.current) - x;
+    dragLast.current = e.touches[0].clientX;
+    setx(clamp(value, x_min, x_max));
+  };
+  useEffect(() => {
+    if (!playing) {
+      const checkActive = (index: number) => {
+        const left = -(index + 0.5) * metric.frame.width;
+        const right = -(index - 0.5) * metric.frame.width;
+        const rel_x = x - x_max;
+        return rel_x > left && rel_x < right;
+      };
+      const getActive = () => {
+        let new_active = 0;
+        for (let i = 0; i < frames.length; i++) {
+          if (checkActive(i)) {
+            new_active = i;
+            break;
+          }
+        }
+        return new_active;
+      };
+      setActive(getActive());
+    }
+  }, [playing, x, x_max, frames.length]);
   return (
     <GlobalContext.Provider value={{}}>
       <Paper

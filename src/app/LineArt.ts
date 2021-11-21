@@ -1,4 +1,4 @@
-import paper, { Color, Point } from "paper";
+import paper from "paper";
 declare global {
   interface Window {
     GUILAYER: paper.Layer;
