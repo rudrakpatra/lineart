@@ -155,7 +155,7 @@ function DopeSheet() {
 }
 function Frame(props: { active: boolean; index: number }) {
   const margin = 2;
-  const padding = theme.spacing(1);
+  const padding = 3;
   const width = metric.frame.width - 2 * (margin + padding);
   const height = metric.frame.height;
   return (

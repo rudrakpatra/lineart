@@ -1,7 +1,7 @@
 import React from "react";
 import "./App.css";
 import Tools from "./app/Tools";
-import { MuiThemeProvider, createTheme } from "@material-ui/core/styles";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
 import ToggleFullScreen from "./app/ToggleFullScreen";
 import DopeSheet from "./app/components/DopeSheet";
 import { setupLineArt } from "./app/LineArt";
@@ -28,11 +28,11 @@ export const theme = createTheme({
 function App() {
   return (
     <div className="App">
-      <MuiThemeProvider theme={theme}>
+      <ThemeProvider theme={theme}>
         <DopeSheet />
         <Tools />
         <ToggleFullScreen canvas={canvas} />
-      </MuiThemeProvider>
+      </ThemeProvider>
     </div>
   );
 }

@@ -67,7 +67,7 @@ function BasicMenu(props: { items: Item[] }) {
         aria-controls="basic-menu"
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
-        onClick={(e) => {
+        onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
           open ? closeMenu() : openMenu(e);
         }}
         color={"primary"}
