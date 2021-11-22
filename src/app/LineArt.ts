@@ -1,4 +1,5 @@
 import paper from "paper";
+// import { Point, Color } from "paper";
 declare global {
   interface Window {
     GUILAYER: paper.Layer;
@@ -16,6 +17,7 @@ export function setupLineArt(canvas: HTMLCanvasElement) {
   // var from = new Point(paper.view.center);
   // var to = new Point(paper.view.center.x + 60, paper.view.center.y + 60);
   // var shape = new paper.Path.Rectangle(from, to);
+  // window.ACTIVEFRAME.addChild(shape);
   // shape.fillColor = new Color(0);
   // shape.strokeWidth = 1;
   // shape.strokeColor = new Color(0);

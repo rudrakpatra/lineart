@@ -1,21 +1,26 @@
 import Paper from "@mui/material/Paper";
 import paper from "paper";
-import Icon from "@mdi/react";
 import React, { createContext, useEffect, useRef, useState } from "react";
 import { theme } from "../../App";
-import {
-  mdiDelete,
-  mdiPause,
-  mdiPlay,
-  mdiTransitionMasked,
-  mdiContentDuplicate,
-  mdiRefresh,
-  mdiPlusBox,
-} from "@mdi/js";
+import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
+import PauseCircleOutlineIcon from "@mui/icons-material/PauseCircleOutline";
+import AllInclusiveIcon from "@mui/icons-material/AllInclusive";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import AnimationIcon from "@mui/icons-material/Animation";
+import IconButton from "@mui/material/IconButton";
+
+declare global {
+  interface Window {
+    TIME: number;
+  }
+}
+window.TIME = 0;
 class Metric {
   frame: { height: number; width: number };
   constructor() {
-    this.frame = { height: 30, width: 60 };
+    this.frame = { height: 35, width: 60 };
   }
 }
 const metric = new Metric();
@@ -42,16 +47,19 @@ function DopeSheet() {
   useEffect(() => {
     //console.log(active)
   }, [active]);
-
   //animation
   const [playing, setPlaying] = React.useState(false);
-
-  setTimeout(() => {
-    if (frames.length > 1) {
-      if (playing && (active + 1 < frames.length || loopingAnimation))
-        setActive((active + 1) % frames.length);
+  paper.view.onFrame = (e: { delta: number; time: number; count: number }) => {
+    if (window.TIME > 24 / 1000) {
+      window.TIME = 0;
+      if (frames.length > 1) {
+        if (playing && (active + 1 < frames.length || loopingAnimation))
+          setActive((active + 1) % frames.length);
+      }
+    } else {
+      window.TIME += e.delta;
     }
-  }, 1000 / 24);
+  };
   useEffect(() => {
     frames.forEach((frame) => {
       frame.visible = false;
@@ -128,6 +136,7 @@ function DopeSheet() {
             style={{
               display: "flex",
               transform: `translateX(${x}px)`,
+              opacity: playing ? 0.4 : 1,
             }}
           >
             {frames.map((frame, i) => {
@@ -192,9 +201,16 @@ function Menu(props: {
   setx: React.Dispatch<React.SetStateAction<number>>;
   x_max: number;
 }) {
-  const iconSize = 2;
-  const activeColor = theme.palette.secondary.main;
-  const standardColor = theme.palette.grey[500];
+  const iconSize = "large";
+  const style = {
+    display: "flex",
+    alignItems: "center",
+    padding: 2,
+    marginDown: 2,
+    margin: 5,
+    borderRadius: 6,
+    background: theme.palette.grey[300],
+  };
   return (
     <div
       style={{
@@ -202,34 +218,32 @@ function Menu(props: {
         userSelect: "none",
       }}
     >
-      <div
-        style={{ display: "flex", alignItems: "center" }}
+      <IconButton
+        style={style}
         onClick={() => {
           props.setPlaying(!props.playing);
         }}
       >
-        <Icon
-          path={props.playing ? mdiPause : mdiPlay}
-          size={iconSize}
-          color={standardColor}
-        />
-      </div>
-      <div
-        style={{ display: "flex", alignItems: "center" }}
+        {props.playing ? (
+          <PauseCircleOutlineIcon fontSize={iconSize} />
+        ) : (
+          <PlayCircleOutlineIcon fontSize={iconSize} />
+        )}
+      </IconButton>
+      <IconButton
+        style={style}
         onClick={() => {
           props.setLoopingAnimation(!props.loopingAnimation);
         }}
       >
-        <Icon
-          path={mdiRefresh}
-          size={iconSize}
-          rotate={180}
-          color={props.loopingAnimation ? activeColor : standardColor}
+        <AllInclusiveIcon
+          fontSize={iconSize}
+          color={props.loopingAnimation ? "secondary" : "disabled"}
         />
-      </div>
+      </IconButton>
       <hr style={{ border: "none" }} />
-      <div
-        style={{ display: "flex", alignItems: "center" }}
+      <IconButton
+        style={style}
         onClick={(e) => {
           new paper.Group({ visible: false }).insertAbove(
             props.frames[props.active]
@@ -241,10 +255,10 @@ function Menu(props: {
           props.setx(-(props.active + 1) * metric.frame.width + props.x_max);
         }}
       >
-        <Icon path={mdiPlusBox} size={iconSize} color={standardColor} />
-      </div>
-      <div
-        style={{ display: "flex", alignItems: "center" }}
+        <AddCircleOutlineIcon fontSize={iconSize} />
+      </IconButton>
+      <IconButton
+        style={style}
         onClick={(e) => {
           if (props.frames[props.active]) {
             props.frames[props.active].clone();
@@ -255,14 +269,10 @@ function Menu(props: {
           props.setx(-(props.active + 1) * metric.frame.width + props.x_max);
         }}
       >
-        <Icon
-          path={mdiContentDuplicate}
-          size={iconSize}
-          color={standardColor}
-        />
-      </div>
-      <div
-        style={{ display: "flex", alignItems: "center" }}
+        <ContentCopyIcon fontSize={iconSize} />
+      </IconButton>
+      <IconButton
+        style={style}
         onClick={() => {
           if (props.frames.length === 1)
             new paper.Group({ visible: false }).insertAbove(
@@ -279,20 +289,19 @@ function Menu(props: {
           props.setFrames(window.FRAMELAYER.children.slice());
         }}
       >
-        <Icon path={mdiDelete} size={iconSize} color={standardColor} />
-      </div>
-      <div
-        style={{ display: "flex", alignItems: "center" }}
+        <DeleteOutlineIcon fontSize={iconSize} />
+      </IconButton>
+      <IconButton
+        style={style}
         onClick={() => {
           props.setOnionSkin(!props.onionSkin);
         }}
       >
-        <Icon
-          path={mdiTransitionMasked}
-          size={iconSize}
-          color={props.onionSkin ? activeColor : standardColor}
+        <AnimationIcon
+          fontSize={iconSize}
+          color={props.onionSkin ? "secondary" : "disabled"}
         />
-      </div>
+      </IconButton>
     </div>
   );
 }

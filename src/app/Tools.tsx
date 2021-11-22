@@ -3,40 +3,41 @@ import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 
-import { mdiDragVariant } from "@mdi/js";
-import { mdiResize } from "@mdi/js";
-import { mdiLayersTriple } from "@mdi/js";
-import { mdiVectorSquareEdit } from "@mdi/js";
+// import { mdiDragVariant } from "@mdi/js";
+// import { mdiResize } from "@mdi/js";
+// import { mdiLayersTriple } from "@mdi/js";
+// import { mdiVectorSquareEdit } from "@mdi/js";
+// import { mdiSelectionEllipse } from "@mdi/js";
 import { mdiVectorBezier } from "@mdi/js";
 
-import { mdiPalette } from "@mdi/js";
+// import { mdiPalette } from "@mdi/js";
 import { mdiDraw } from "@mdi/js";
-import { mdiSelectionEllipse } from "@mdi/js";
+
 import Icon from "@mdi/react";
 import { theme } from "../App";
 import Draw from "./tools/Draw";
-import Edit from "./tools/Edit";
+// import Edit from "./tools/Edit";
 import Bezier from "./tools/Bezier";
 
 const draw = new Draw();
-const edit = new Edit();
+// const edit = new Edit();
 const beizer = new Bezier();
 export default function Tools() {
   const items = [
-    new Item(mdiDragVariant, () => {}),
-    new Item(mdiResize, () => {}),
-    new Item(mdiLayersTriple, () => {}),
-    new Item(mdiSelectionEllipse, () => {}),
-    new Item(mdiVectorSquareEdit, () => {
-      edit.activate();
-    }),
+    // new Item(mdiDragVariant, () => {}),
+    // new Item(mdiResize, () => {}),
+    // new Item(mdiLayersTriple, () => {}),
+    // new Item(mdiSelectionEllipse, () => {}),
+    // new Item(mdiVectorSquareEdit, () => {
+    //   edit.activate();
+    // }),
     new Item(mdiVectorBezier, () => {
       beizer.activate();
     }),
     new Item(mdiDraw, () => {
       draw.activate();
     }),
-    new Item(mdiPalette, () => {}),
+    // new Item(mdiPalette, () => {}),
   ];
   return <BasicMenu items={items} />;
 }
