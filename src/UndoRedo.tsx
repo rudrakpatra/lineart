@@ -23,6 +23,7 @@ function UndoRedo() {
         style={style}
         onClick={() => {
           if (undo) {
+            window.dispatchEvent(window.onToolCancellation);
             undo();
             frame.data.current -= 1;
             update();
@@ -36,6 +37,7 @@ function UndoRedo() {
         style={style}
         onClick={() => {
           if (redo) {
+            window.dispatchEvent(window.onToolCancellation);
             redo();
             frame.data.current += 1;
             update();
