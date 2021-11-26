@@ -53,10 +53,12 @@ export default function Tools() {
     // //   edit.activate();
     // // }),
     new Item(mdiVectorBezier, () => {
+      window.dispatchEvent(window.onToolCancellation);
       window.TOOLMANAGER.active = [tools.bezier, tools.twoFingerPanZoom];
     }),
     new Item(mdiDraw, () => {
       paper.project.deselectAll();
+      window.dispatchEvent(window.onToolCancellation);
       window.TOOLMANAGER.active = [tools.draw, tools.twoFingerPanZoom];
     }),
     // new Item(mdiPalette, () => {}),
