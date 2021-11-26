@@ -1,25 +1,31 @@
 import paper from "paper";
-// import { Point, Color } from "paper";
 declare global {
   interface Window {
-    GUILAYER: paper.Layer;
-    FRAMELAYER: paper.Layer;
-    ACTIVEFRAME: paper.Group;
+    GUI_LAYER: paper.Layer;
+    FRAME_LAYER: paper.Layer;
+    ACTIVE_FRAME: paper.Group;
+    CURRENT: number;
+    UPDATE: {
+      undoRedo?: Function;
+    };
+  }
+}
+export class State {
+  undo?: () => void;
+  redo?: () => void;
+  constructor(undo?: () => void, redo?: () => void) {
+    this.undo = undo;
+    this.redo = redo;
   }
 }
 export function setupLineArt(canvas: HTMLCanvasElement) {
-  window.screen.orientation.lock("portrait");
   paper.project = new paper.Project(canvas);
-  paper.settings.handleSize = 8;
-  window.FRAMELAYER = new paper.Layer({ data: { frameLayer: true } });
-  window.ACTIVEFRAME = new paper.Group({ visible: true });
-
-  // var from = new Point(paper.view.center);
-  // var to = new Point(paper.view.center.x + 60, paper.view.center.y + 60);
-  // var shape = new paper.Path.Rectangle(from, to);
-  // window.ACTIVEFRAME.addChild(shape);
-  // shape.fillColor = new Color(0);
-  // shape.strokeWidth = 1;
-  // shape.strokeColor = new Color(0);
-  // shape.clone();
+  paper.settings.handleSize = 10;
+  window.FRAME_LAYER = new paper.Layer({ data: { frameLayer: true } });
+  window.ACTIVE_FRAME = new paper.Group({
+    visible: true,
+    data: { history: [new State()], current: 0 },
+  });
+  window.GUI_LAYER = new paper.Layer({ data: { guiLayer: true } });
+  window.UPDATE = {};
 }

@@ -1,45 +1,67 @@
 import React, { useState } from "react";
-import Button from "@mui/material/Button";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
+// import IconButton from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import ButtonGroup from "@mui/material/ButtonGroup";
 
 // import { mdiDragVariant } from "@mdi/js";
 // import { mdiResize } from "@mdi/js";
 // import { mdiLayersTriple } from "@mdi/js";
 // import { mdiVectorSquareEdit } from "@mdi/js";
 // import { mdiSelectionEllipse } from "@mdi/js";
-import { mdiVectorBezier } from "@mdi/js";
 
 // import { mdiPalette } from "@mdi/js";
+import { mdiVectorBezier } from "@mdi/js";
 import { mdiDraw } from "@mdi/js";
 
 import Icon from "@mdi/react";
 import { theme } from "../App";
-import Draw from "./tools/Draw";
-// import Edit from "./tools/Edit";
-import Bezier from "./tools/Bezier";
+import ToolManager from "./tools/ToolManager";
 
-const draw = new Draw();
-// const edit = new Edit();
-const beizer = new Bezier();
+import Draw from "./tools/Draw";
+import Bezier from "./tools/Bezier";
+import TwoFingerPanZoom from "./tools/TwoFingerPanZoom";
+import paper from "paper";
+declare global {
+  interface Window {
+    TOOLMANAGER: ToolManager;
+    TOOLS: ToolList;
+  }
+}
+class ToolList {
+  draw: Draw;
+  bezier: Bezier;
+  twoFingerPanZoom: TwoFingerPanZoom;
+  constructor() {
+    this.draw = new Draw();
+    this.bezier = new Bezier();
+    this.twoFingerPanZoom = new TwoFingerPanZoom();
+  }
+}
+window.TOOLMANAGER = new ToolManager();
+window.TOOLS = new ToolList();
 export default function Tools() {
+  const tools = window.TOOLS;
+  window.TOOLMANAGER.active = [tools.bezier, tools.twoFingerPanZoom];
   const items = [
     // new Item(mdiDragVariant, () => {}),
     // new Item(mdiResize, () => {}),
     // new Item(mdiLayersTriple, () => {}),
-    // new Item(mdiSelectionEllipse, () => {}),
-    // new Item(mdiVectorSquareEdit, () => {
-    //   edit.activate();
+    // new Item(mdiSelectionEllipse, () => {
+    //   select.activate();
     // }),
+    // // new Item(mdiVectorSquareEdit, () => {
+    // //   edit.activate();
+    // // }),
     new Item(mdiVectorBezier, () => {
-      beizer.activate();
+      window.TOOLMANAGER.active = [tools.bezier, tools.twoFingerPanZoom];
     }),
     new Item(mdiDraw, () => {
-      draw.activate();
+      paper.project.deselectAll();
+      window.TOOLMANAGER.active = [tools.draw, tools.twoFingerPanZoom];
     }),
     // new Item(mdiPalette, () => {}),
   ];
-  return <BasicMenu items={items} />;
+  return <ButtonGroupMenu items={items} />;
 }
 class Item {
   onClick: Function;
@@ -50,66 +72,32 @@ class Item {
   }
 }
 
-function BasicMenu(props: { items: Item[] }) {
+function ButtonGroupMenu(props: { items: Item[] }) {
   let [active, setActive] = useState(0);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
-  const openMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const closeMenu = () => {
-    setAnchorEl(null);
-  };
-
   return (
     <div style={{ position: "fixed", bottom: 10, left: 10 }}>
-      <Button
-        id="basic-button"
-        aria-controls="basic-menu"
-        aria-haspopup="true"
-        aria-expanded={open ? "true" : undefined}
-        onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-          open ? closeMenu() : openMenu(e);
-        }}
-        color={"primary"}
+      <ButtonGroup
+        orientation="vertical"
         variant="contained"
-      >
-        {props.items[active].icon}
-      </Button>
-      <Menu
-        id="basic-menu"
-        anchorEl={anchorEl}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        transformOrigin={{ vertical: "top", horizontal: "center" }}
-        open={open}
-        transitionDuration={100}
-        onClose={closeMenu}
-        PaperProps={{
-          style: {
-            background: theme.palette.grey[200],
-          },
-        }}
-        MenuListProps={{
-          "aria-labelledby": "basic-button",
-          style: {
-            background: theme.palette.grey[200],
-            color: theme.palette.common.black,
-          },
+        style={{
+          background: theme.palette.grey[100],
+          color: theme.palette.common.black,
         }}
       >
         {props.items.map((item, index) => (
-          <MenuItem
+          <IconButton
             key={index}
+            color={index === active ? "primary" : "secondary"}
+            size={"large"}
             onClick={(e: any) => {
               setActive(index);
               item.onClick(e);
-              closeMenu();
             }}
           >
             {item.icon}
-          </MenuItem>
+          </IconButton>
         ))}
-      </Menu>
+      </ButtonGroup>
     </div>
   );
 }

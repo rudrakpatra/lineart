@@ -1,7 +1,6 @@
 import Paper from "@mui/material/Paper";
 import paper from "paper";
 import React, { createContext, useEffect, useRef, useState } from "react";
-import { theme } from "../../App";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import PauseCircleOutlineIcon from "@mui/icons-material/PauseCircleOutline";
 import AllInclusiveIcon from "@mui/icons-material/AllInclusive";
@@ -10,6 +9,8 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import AnimationIcon from "@mui/icons-material/Animation";
 import IconButton from "@mui/material/IconButton";
+import { theme } from "../../App";
+import { State } from "../LineArt";
 
 declare global {
   interface Window {
@@ -36,12 +37,11 @@ function clamp(n: number, min: number, max: number) {
 }
 
 function DopeSheet() {
-  const [frames, setFrames] = useState(window.FRAMELAYER.children);
+  const [frames, setFrames] = useState(window.FRAME_LAYER.children);
   const x_max = (window.innerWidth - metric.frame.width) / 2;
   const x_min = x_max - metric.frame.width * (frames.length - 1);
   const [x, setx] = useState(x_max);
   const [active, setActive] = useState(0);
-
   const [onionSkin, setOnionSkin] = React.useState(true);
   const [loopingAnimation, setLoopingAnimation] = React.useState(false);
   useEffect(() => {
@@ -50,7 +50,7 @@ function DopeSheet() {
   //animation
   const [playing, setPlaying] = React.useState(false);
   paper.view.onFrame = (e: { delta: number; time: number; count: number }) => {
-    if (window.TIME > 24 / 1000) {
+    if (window.TIME > 12 / 1000) {
       window.TIME = 0;
       if (frames.length > 1) {
         if (playing && (active + 1 < frames.length || loopingAnimation))
@@ -63,10 +63,10 @@ function DopeSheet() {
   useEffect(() => {
     frames.forEach((frame) => {
       frame.visible = false;
-      frame.selected = false;
     });
     const activeFrame = frames[active];
     if (activeFrame) {
+      window.UPDATE.undoRedo && window.UPDATE.undoRedo();
       if (onionSkin) {
         let prev = activeFrame.previousSibling;
         let next = activeFrame.nextSibling;
@@ -76,12 +76,12 @@ function DopeSheet() {
           if (activeFrame === first) prev = last;
           else if (activeFrame === last) next = first;
         }
-        if (prev) prev.set({ visible: true, opacity: 0.5 });
+        if (prev) prev.set({ visible: true, strokeColor: "#dd0000" });
 
-        if (next) next.set({ visible: true, opacity: 0.5 });
+        if (next) next.set({ visible: true, strokeColor: "#00aa00" });
       }
-      window.ACTIVEFRAME = activeFrame as paper.Group;
-      activeFrame.set({ visible: true, opacity: 1 });
+      window.ACTIVE_FRAME = activeFrame as paper.Group;
+      activeFrame.set({ visible: true, strokeColor: "black" });
     }
   }, [active, onionSkin, loopingAnimation, frames]);
 
@@ -96,6 +96,7 @@ function DopeSheet() {
     const value =
       scroll_sensitivity * (x + e.touches[0].clientX - dragLast.current) - x;
     dragLast.current = e.touches[0].clientX;
+    console.log("sf");
     setx(clamp(value, x_min, x_max));
   };
   useEffect(() => {
@@ -121,12 +122,10 @@ function DopeSheet() {
   }, [playing, x, x_max, frames.length]);
   return (
     <GlobalContext.Provider value={{}}>
-      <Paper
-        onTouchStart={handleScrollStart}
-        onTouchMove={handleScrollMove}
-        style={{ paddingBottom: 5, background: theme.palette.grey[200] }}
-      >
+      <Paper style={{ paddingBottom: 5, background: theme.palette.grey[200] }}>
         <div
+          onTouchStart={handleScrollStart}
+          onTouchMove={handleScrollMove}
           style={{
             background: theme.palette.grey[300],
             padding: 2,
@@ -178,8 +177,8 @@ function Frame(props: { active: boolean; index: number }) {
         width: width,
         minWidth: width,
         background: props.active
-          ? theme.palette.secondary.main
-          : theme.palette.primary.main,
+          ? theme.palette.primary.main
+          : theme.palette.secondary.main,
       }}
     >
       {props.index}
@@ -238,19 +237,19 @@ function Menu(props: {
       >
         <AllInclusiveIcon
           fontSize={iconSize}
-          color={props.loopingAnimation ? "secondary" : "disabled"}
+          color={props.loopingAnimation ? "primary" : "disabled"}
         />
       </IconButton>
       <hr style={{ border: "none" }} />
       <IconButton
         style={style}
         onClick={(e) => {
-          new paper.Group({ visible: false }).insertAbove(
-            props.frames[props.active]
-          );
+          new paper.Group({
+            visible: false,
+            data: { history: [new State()], current: 0 },
+          }).insertAbove(props.frames[props.active]);
           if (props.frames[props.active])
-            props.frames[props.active].selected = false;
-          props.setFrames(window.FRAMELAYER.children.slice());
+            props.setFrames(window.FRAME_LAYER.children.slice());
           props.setActive(props.active + 1);
           props.setx(-(props.active + 1) * metric.frame.width + props.x_max);
         }}
@@ -262,9 +261,8 @@ function Menu(props: {
         onClick={(e) => {
           if (props.frames[props.active]) {
             props.frames[props.active].clone();
-            props.frames[props.active].selected = false;
           }
-          props.setFrames(window.FRAMELAYER.children.slice());
+          props.setFrames(window.FRAME_LAYER.children.slice());
           props.setActive(props.active + 1);
           props.setx(-(props.active + 1) * metric.frame.width + props.x_max);
         }}
@@ -275,9 +273,10 @@ function Menu(props: {
         style={style}
         onClick={() => {
           if (props.frames.length === 1)
-            new paper.Group({ visible: false }).insertAbove(
-              props.frames[props.active]
-            );
+            new paper.Group({
+              visible: false,
+              data: { history: [new State()], current: 0 },
+            }).insertAbove(props.frames[props.active]);
           props.frames[props.active].remove();
 
           const newActive = Math.max(
@@ -286,7 +285,7 @@ function Menu(props: {
           );
           props.setActive(newActive);
           props.setx(-newActive * metric.frame.width + props.x_max);
-          props.setFrames(window.FRAMELAYER.children.slice());
+          props.setFrames(window.FRAME_LAYER.children.slice());
         }}
       >
         <DeleteOutlineIcon fontSize={iconSize} />
@@ -299,7 +298,7 @@ function Menu(props: {
       >
         <AnimationIcon
           fontSize={iconSize}
-          color={props.onionSkin ? "secondary" : "disabled"}
+          color={props.onionSkin ? "primary" : "disabled"}
         />
       </IconButton>
     </div>

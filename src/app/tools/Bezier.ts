@@ -1,45 +1,131 @@
 import paper from "paper";
-export default class Bezier extends paper.Tool {
-  bezierStroke?: paper.Path;
-  segmentA?: paper.Segment;
-  segmentB?: paper.Segment;
-  step: number;
-  onActivate: () => void;
+import { State } from "../LineArt";
+import { Tool } from "./ToolManager";
+export default class Bezier extends Tool {
+  path?: paper.Path;
+  target?: paper.Segment;
+  targetType?: string;
+  transparentColor: paper.Color;
   constructor() {
     super();
-    this.onActivate = () => {
-      paper.project.deselectAll();
-    };
-    this.step = 0;
-    this.onMouseDown = (e: paper.ToolEvent) => {
-      switch (this.step) {
-        case 0:
-          this.bezierStroke = new paper.Path();
-          window.ACTIVEFRAME.addChild(this.bezierStroke);
-          this.bezierStroke.strokeColor = new paper.Color(1, 0, 0);
-          this.bezierStroke.add(e.point);
-          this.bezierStroke.add(e.point);
-          this.segmentA = this.bezierStroke.segments[0];
-          this.segmentB = this.bezierStroke.segments[1];
+    this.transparentColor = new paper.Color("#009dec33");
+    this.onDoupleTap = () => {
+      if (this.path) {
+        this.path.data.fullyConfirmed = true;
+        this.path.selected = false;
+        //
+        const path = this.path;
+        const frame = window.ACTIVE_FRAME;
+        frame.data.history = frame.data.history.slice(
+          0,
+          frame.data.current + 1
+        );
+        frame.data.history[frame.data.current].redo = () => {
+          frame.addChild(path);
+        };
+        frame.data.history.push(new State());
+        frame.data.current += 1;
+        frame.data.history[frame.data.current].undo = () => {
+          path.remove();
+        };
+        window.UPDATE.undoRedo && window.UPDATE.undoRedo();
+        this.path = undefined;
       }
     };
-    this.onMouseDrag = (e: paper.ToolEvent) => {
-      switch (this.step) {
-        case 0:
-          if (this.segmentB) this.segmentB.point = e.point;
-          break;
-        case 1:
-          if (this.segmentA)
-            this.segmentA.handleOut = this.segmentA.handleOut.add(e.delta);
-          break;
-        case 2:
-          if (this.segmentB)
-            this.segmentB.handleIn = this.segmentB.handleIn.add(e.delta);
+    this.onTouchDown = (e: paper.ToolEvent) => {
+      this.target = undefined;
+      this.targetType = undefined;
+      if (this.path?.fullySelected) this.getnearestSegmentOrHandle(e.point);
+      else {
+        this.path = new paper.Path({
+          strokeCap: "round",
+          miterLimit: 1,
+          strokeWidth: 1,
+          strokeColor: "black",
+          opacity: 1,
+        });
+        window.ACTIVE_FRAME.addChild(this.path);
+        this.path?.add(e.point);
+        this.path?.add(e.point);
+        this.path.fullySelected = true;
       }
     };
-    this.onMouseUp = (e: paper.ToolEvent) => {
-      this.step = (this.step + 1) % 3;
-      this.bezierStroke = undefined;
+    this.onSingleTouchMove = (touch: paper.Point, e: paper.ToolEvent) => {
+      if (this.path?.fullySelected) {
+        if (this.target) {
+          switch (this.targetType) {
+            case "handleIn":
+              this.target.handleIn = e.delta.add(this.target.handleIn);
+              break;
+            case "handleOut":
+              this.target.handleOut = e.delta.add(this.target.handleOut);
+              break;
+            case "segment":
+              this.target.point = this.target.point.add(e.delta);
+              break;
+          }
+          // let angle;
+          // switch (this.targetType) {
+          //   case "handleIn":
+          //     angle = this.target.handleIn.multiply(-1).angle;
+          //     if (this.target.handleOut.length)
+          //       this.target.handleOut.angle = angle;
+          //     break;
+          //   case "handleOut":
+          //     angle = this.target.handleOut.multiply(-1).angle;
+          //     if (this.target.handleIn.length)
+          //       this.target.handleIn.angle = angle;
+          //     break;
+          // }
+        } else {
+          if (this.path && this.path.segments.length) {
+            const [ptA, ptB] = this.path.segments;
+            ptA.handleOut = ptA.handleOut.add(e.delta.multiply(0.25));
+            ptB.handleIn = ptB.handleIn.add(e.delta.multiply(-0.25));
+            ptB.point = ptB.point.add(e.delta);
+          }
+        }
+      }
     };
+    this.onDualTouchMove = () => {
+      if (this.path && !this.path.data.confirmed) {
+        this.path.remove();
+        this.path = undefined;
+      }
+    };
+    this.onTouchRelease = (e: paper.ToolEvent) => {
+      if (this.path?.fullySelected) {
+        this.path.data.confirmed = true;
+        this.path.selectedColor = null;
+      }
+      // this.softenPath(4);
+      // this.path.smooth();
+    };
+  }
+  getnearestSegmentOrHandle(point: paper.Point) {
+    let nearest = Infinity;
+    if (this.path) {
+      this.path.segments.forEach((segment) => {
+        const p2s = point.subtract(segment.point).length;
+        const p2i = point.subtract(segment.point.add(segment.handleIn)).length;
+        const p2o = point.subtract(segment.point.add(segment.handleOut)).length;
+        if (p2i < nearest && segment.handleIn.length > 0) {
+          this.target = segment;
+          this.targetType = "handleIn";
+          nearest = p2i;
+        }
+        if (p2o < nearest && segment.handleOut.length > 0) {
+          this.target = segment;
+          this.targetType = "handleOut";
+          nearest = p2o;
+        }
+        if (p2s < nearest) {
+          this.target = segment;
+          this.targetType = "segment";
+          nearest = p2s;
+        }
+      });
+    }
+    if (this.path) this.path.selectedColor = this.transparentColor;
   }
 }
