@@ -25,7 +25,6 @@ class Metric {
   }
 }
 const metric = new Metric();
-const GlobalContext = createContext<{}>({});
 function clamp(n: number, min: number, max: number) {
   if (n > max) {
     return max;
@@ -61,6 +60,7 @@ function DopeSheet() {
     }
   };
   useEffect(() => {
+    window.dispatchEvent(window.onToolCancellation);
     frames.forEach((frame) => {
       frame.visible = false;
     });
@@ -96,7 +96,6 @@ function DopeSheet() {
     const value =
       scroll_sensitivity * (x + e.touches[0].clientX - dragLast.current) - x;
     dragLast.current = e.touches[0].clientX;
-    console.log("sf");
     setx(clamp(value, x_min, x_max));
   };
   useEffect(() => {
@@ -121,44 +120,42 @@ function DopeSheet() {
     }
   }, [playing, x, x_max, frames.length]);
   return (
-    <GlobalContext.Provider value={{}}>
-      <Paper style={{ paddingBottom: 5, background: theme.palette.grey[200] }}>
+    <Paper style={{ paddingBottom: 5, background: theme.palette.grey[200] }}>
+      <div
+        onTouchStart={handleScrollStart}
+        onTouchMove={handleScrollMove}
+        style={{
+          background: theme.palette.grey[300],
+          padding: 2,
+        }}
+      >
         <div
-          onTouchStart={handleScrollStart}
-          onTouchMove={handleScrollMove}
           style={{
-            background: theme.palette.grey[300],
-            padding: 2,
+            display: "flex",
+            transform: `translateX(${x}px)`,
+            opacity: playing ? 0.4 : 1,
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              transform: `translateX(${x}px)`,
-              opacity: playing ? 0.4 : 1,
-            }}
-          >
-            {frames.map((frame, i) => {
-              return <Frame active={active === i} index={i} />;
-            })}
-          </div>
+          {frames.map((frame, i) => {
+            return <Frame active={active === i} index={i} />;
+          })}
         </div>
-        <Menu
-          playing={playing}
-          setPlaying={setPlaying}
-          loopingAnimation={loopingAnimation}
-          setLoopingAnimation={setLoopingAnimation}
-          active={active}
-          setActive={setActive}
-          onionSkin={onionSkin}
-          setOnionSkin={setOnionSkin}
-          frames={frames}
-          setFrames={setFrames}
-          setx={setx}
-          x_max={x_max}
-        />
-      </Paper>
-    </GlobalContext.Provider>
+      </div>
+      <Menu
+        playing={playing}
+        setPlaying={setPlaying}
+        loopingAnimation={loopingAnimation}
+        setLoopingAnimation={setLoopingAnimation}
+        active={active}
+        setActive={setActive}
+        onionSkin={onionSkin}
+        setOnionSkin={setOnionSkin}
+        frames={frames}
+        setFrames={setFrames}
+        setx={setx}
+        x_max={x_max}
+      />
+    </Paper>
   );
 }
 function Frame(props: { active: boolean; index: number }) {

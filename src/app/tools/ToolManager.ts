@@ -5,6 +5,8 @@ export class Tool {
     //@ts-ignore
     toolManager.active = this;
   }
+  /**called when some action forces the tool to stop */
+  onCancellation() {}
   /**called once when a pointer touches to surface */
   onTouchDown(e: paper.ToolEvent, touchEvent: TouchEvent): void {}
 
@@ -22,6 +24,12 @@ export class Tool {
     touch2: paper.Point,
     e: paper.ToolEvent
   ): void {}
+}
+
+declare global {
+  interface Window {
+    onToolCancellation: CustomEvent<unknown>;
+  }
 }
 export default class ToolManager {
   private paperTool: paper.Tool;
@@ -81,5 +89,10 @@ export default class ToolManager {
           break;
       }
     };
+    window.onToolCancellation = new CustomEvent("toolCancellation");
+    const toolCancellation = () => {
+      this.active?.forEach((tool) => tool.onCancellation());
+    };
+    window.addEventListener("toolCancellation", toolCancellation, false);
   }
 }

@@ -9,6 +9,12 @@ export default class Bezier extends Tool {
   constructor() {
     super();
     this.transparentColor = new paper.Color("#009dec33");
+    this.onCancellation = () => {
+      if (this.path) {
+        this.path.remove();
+        this.path = undefined;
+      }
+    };
     this.onDoupleTap = () => {
       if (this.path) {
         this.path.data.fullyConfirmed = true;
