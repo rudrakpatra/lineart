@@ -1,5 +1,5 @@
 import paper from "paper";
-import { State } from "../LineArt";
+import { reversibleAction } from "../LineArt";
 import { Tool } from "./ToolManager";
 export default class Bezier extends Tool {
   path?: paper.Path;
@@ -22,19 +22,15 @@ export default class Bezier extends Tool {
         //
         const path = this.path;
         const frame = window.ACTIVE_FRAME;
-        frame.data.history = frame.data.history.slice(
-          0,
-          frame.data.current + 1
+        reversibleAction(
+          frame,
+          () => {
+            frame.addChild(path);
+          },
+          () => {
+            path.remove();
+          }
         );
-        frame.data.history[frame.data.current].redo = () => {
-          frame.addChild(path);
-        };
-        frame.data.history.push(new State());
-        frame.data.current += 1;
-        frame.data.history[frame.data.current].undo = () => {
-          path.remove();
-        };
-        window.UPDATE.undoRedo && window.UPDATE.undoRedo();
         this.path = undefined;
       }
     };

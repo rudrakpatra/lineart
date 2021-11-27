@@ -10,7 +10,7 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import AnimationIcon from "@mui/icons-material/Animation";
 import IconButton from "@mui/material/IconButton";
 import { theme } from "../../App";
-import { State } from "../LineArt";
+import { newFrame } from "../LineArt";
 
 declare global {
   interface Window {
@@ -76,9 +76,19 @@ function DopeSheet() {
           if (activeFrame === first) prev = last;
           else if (activeFrame === last) next = first;
         }
-        if (prev) prev.set({ visible: true, strokeColor: "#dd0000" });
+        if (prev)
+          prev.set({
+            visible: true,
+            blendMode: "multiply",
+            strokeColor: "red",
+          });
 
-        if (next) next.set({ visible: true, strokeColor: "#00aa00" });
+        if (next)
+          next.set({
+            visible: true,
+            blendMode: "multiply",
+            strokeColor: "green",
+          });
       }
       window.ACTIVE_FRAME = activeFrame as paper.Group;
       activeFrame.set({ visible: true, strokeColor: "black" });
@@ -241,10 +251,7 @@ function Menu(props: {
       <IconButton
         style={style}
         onClick={(e) => {
-          new paper.Group({
-            visible: false,
-            data: { history: [new State()], current: 0 },
-          }).insertAbove(props.frames[props.active]);
+          newFrame().insertAbove(props.frames[props.active]);
           if (props.frames[props.active])
             props.setFrames(window.FRAME_LAYER.children.slice());
           props.setActive(props.active + 1);
@@ -270,10 +277,7 @@ function Menu(props: {
         style={style}
         onClick={() => {
           if (props.frames.length === 1)
-            new paper.Group({
-              visible: false,
-              data: { history: [new State()], current: 0 },
-            }).insertAbove(props.frames[props.active]);
+            newFrame().insertAbove(props.frames[props.active]);
           props.frames[props.active].remove();
 
           const newActive = Math.max(

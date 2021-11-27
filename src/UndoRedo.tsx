@@ -17,6 +17,7 @@ function UndoRedo() {
     borderRadius: 6,
     background: theme.palette.grey[200],
   };
+
   return (
     <div style={{ position: "fixed" }}>
       <IconButton

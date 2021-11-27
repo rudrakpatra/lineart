@@ -1,35 +1,34 @@
 import paper from "paper";
-import { State } from "../LineArt";
+import { reversibleAction } from "../LineArt";
 import { Tool } from "./ToolManager";
 export default class Draw extends Tool {
   path?: paper.Path;
-  target?: paper.Segment;
-  targetType?: string;
-  transparentColor: paper.Color;
+  raster?: paper.Raster;
   constructor() {
     super();
-    this.transparentColor = new paper.Color("#009dec33");
-    this.onDoupleTap = () => {
-      if (this.path) {
-        this.path.selected = false;
-        this.path = undefined;
-      }
-    };
+
     this.onTouchDown = (e: paper.ToolEvent) => {
       this.path = new paper.Path({
+        strokeJoin: "round",
         strokeCap: "round",
         miterLimit: 1,
         strokeWidth: 1,
         strokeColor: "black",
         opacity: 1,
+        // selected: true,
       });
       this.path.add(e.point);
       window.ACTIVE_FRAME.addChild(this.path);
     };
     this.onSingleTouchMove = (touch: paper.Point, e: paper.ToolEvent) => {
       if (this.path) {
-        if (e.point.subtract(this.path.lastSegment.point).length > 10)
+        if (
+          e.point.subtract(this.path.lastSegment.previous?.point).length >
+          3 / paper.view.zoom
+        ) {
           this.path.add(e.point);
+        } else this.path.lastSegment.point = e.point;
+        this.path.smooth();
       }
     };
     this.onDualTouchMove = () => {
@@ -38,26 +37,30 @@ export default class Draw extends Tool {
         this.path = undefined;
       }
     };
+    this.onCancellation = () => {
+      if (this.path) {
+        this.path.remove();
+        this.path = undefined;
+      }
+    };
     this.onTouchRelease = (e: paper.ToolEvent) => {
       if (this.path) {
-        //
-        this.softenPath(4);
-        this.path?.smooth();
+        this.path.smooth();
         const path = this.path;
+        // path.selected = true;
+        // const raster = this.path.rasterize();
+        // this.path.remove();
         const frame = window.ACTIVE_FRAME;
-        frame.data.history = frame.data.history.slice(
-          0,
-          frame.data.current + 1
+
+        reversibleAction(
+          frame,
+          () => {
+            frame.addChild(path);
+          },
+          () => {
+            path.remove();
+          }
         );
-        frame.data.history[frame.data.current].redo = () => {
-          frame.addChild(path);
-        };
-        frame.data.history.push(new State());
-        frame.data.current += 1;
-        frame.data.history[frame.data.current].undo = () => {
-          path.remove();
-        };
-        window.UPDATE.undoRedo && window.UPDATE.undoRedo();
         this.path = undefined;
       }
     };

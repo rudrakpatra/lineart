@@ -41,7 +41,7 @@ window.TOOLMANAGER = new ToolManager();
 window.TOOLS = new ToolList();
 export default function Tools() {
   const tools = window.TOOLS;
-  window.TOOLMANAGER.active = [tools.bezier, tools.twoFingerPanZoom];
+  window.TOOLMANAGER.active = [tools.draw, tools.twoFingerPanZoom];
   const items = [
     // new Item(mdiDragVariant, () => {}),
     // new Item(mdiResize, () => {}),
@@ -52,14 +52,15 @@ export default function Tools() {
     // // new Item(mdiVectorSquareEdit, () => {
     // //   edit.activate();
     // // }),
-    new Item(mdiVectorBezier, () => {
-      window.dispatchEvent(window.onToolCancellation);
-      window.TOOLMANAGER.active = [tools.bezier, tools.twoFingerPanZoom];
-    }),
+
     new Item(mdiDraw, () => {
       paper.project.deselectAll();
       window.dispatchEvent(window.onToolCancellation);
       window.TOOLMANAGER.active = [tools.draw, tools.twoFingerPanZoom];
+    }),
+    new Item(mdiVectorBezier, () => {
+      window.dispatchEvent(window.onToolCancellation);
+      window.TOOLMANAGER.active = [tools.bezier, tools.twoFingerPanZoom];
     }),
     // new Item(mdiPalette, () => {}),
   ];

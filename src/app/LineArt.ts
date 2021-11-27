@@ -10,14 +10,7 @@ declare global {
     };
   }
 }
-export class State {
-  undo?: () => void;
-  redo?: () => void;
-  constructor(undo?: () => void, redo?: () => void) {
-    this.undo = undo;
-    this.redo = redo;
-  }
-}
+
 export function setupLineArt(canvas: HTMLCanvasElement) {
   paper.project = new paper.Project(canvas);
   paper.settings.handleSize = 10;
@@ -28,4 +21,32 @@ export function setupLineArt(canvas: HTMLCanvasElement) {
   });
   window.GUI_LAYER = new paper.Layer({ data: { guiLayer: true } });
   window.UPDATE = {};
+}
+export const newFrame = () => {
+  return new paper.Group({
+    visible: false,
+    data: { history: [new State()], current: 0 },
+  });
+};
+export const reversibleAction = (
+  frame: paper.Group,
+  action: () => void,
+  undo_action?: () => void
+) => {
+  frame.data.history = frame.data.history.slice(0, frame.data.current + 1);
+  frame.data.history.push(new State());
+  frame.data.history[frame.data.current].redo = action;
+  frame.data.history.push(new State());
+  frame.data.current += 1;
+  frame.data.history[frame.data.current].undo = undo_action;
+  window.UPDATE.undoRedo && window.UPDATE.undoRedo();
+  action();
+};
+class State {
+  undo?: () => void;
+  redo?: () => void;
+  constructor(undo?: () => void, redo?: () => void) {
+    this.undo = undo;
+    this.redo = redo;
+  }
 }
