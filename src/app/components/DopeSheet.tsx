@@ -22,7 +22,7 @@ window.TIME = 0;
 class Metric {
   frame: { height: number; width: number };
   constructor() {
-    this.frame = { height: 35, width: window.innerWidth / 7 };
+    this.frame = { height: 35, width: Math.round(window.innerWidth / 7) };
   }
 }
 const metric = new Metric();
@@ -99,11 +99,11 @@ function DopeSheet() {
       >
         <div
           onScroll={(e) => {
-            // console.log(e);
+            console.log(e);
             //@ts-ignore
-            const x = e.target.scrollLeft + metric.frame.width / 2;
+            const x = e.target.scrollLeft / e.target.scrollWidth;
             if (!playing) {
-              setActive(Math.floor(x / metric.frame.width));
+              setActive(Math.round(x * (frames.length + 6)));
             }
           }}
           style={{
