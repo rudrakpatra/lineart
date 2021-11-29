@@ -62,7 +62,7 @@ export default class Draw extends Tool {
         );
         // frame.selected = true;
         this.path = undefined;
-        console.log(frame.children);
+        // console.log(frame.children);
       }
     };
   }

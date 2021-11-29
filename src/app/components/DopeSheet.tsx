@@ -99,7 +99,7 @@ function DopeSheet() {
       >
         <div
           onScroll={(e) => {
-            console.log(e);
+            // console.log(e);
             //@ts-ignore
             const x = e.target.scrollLeft / e.target.scrollWidth;
             if (!playing) {
