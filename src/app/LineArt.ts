@@ -15,17 +15,18 @@ export function setupLineArt(canvas: HTMLCanvasElement) {
   paper.project = new paper.Project(canvas);
   paper.settings.handleSize = 10;
   window.FRAME_LAYER = new paper.Layer({ data: { frameLayer: true } });
-  window.ACTIVE_FRAME = new paper.Group({
-    visible: true,
-    data: { history: [new State()], current: 0 },
-  });
+  window.ACTIVE_FRAME = newFrame();
   window.GUI_LAYER = new paper.Layer({ data: { guiLayer: true } });
   window.UPDATE = {};
 }
 export const newFrame = () => {
   return new paper.Group({
     visible: false,
-    data: { history: [new State()], current: 0 },
+    name: "frame",
+    data: {
+      history: [new State()],
+      current: 0,
+    },
   });
 };
 export const reversibleAction = (

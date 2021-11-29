@@ -46,22 +46,23 @@ export default class Draw extends Tool {
     this.onTouchRelease = (e: paper.ToolEvent) => {
       if (this.path) {
         this.path.smooth();
-        const path = this.path;
-        // path.selected = true;
-        // const raster = this.path.rasterize();
-        // this.path.remove();
         const frame = window.ACTIVE_FRAME;
+        const path = this.path;
 
         reversibleAction(
           frame,
           () => {
+            // console.log(last_raster.id, "to", raster.id);
             frame.addChild(path);
           },
           () => {
+            // console.log(raster.id, "to", last_raster.id);
             path.remove();
           }
         );
+        // frame.selected = true;
         this.path = undefined;
+        console.log(frame.children);
       }
     };
   }

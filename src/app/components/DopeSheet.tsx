@@ -1,6 +1,6 @@
 import Paper from "@mui/material/Paper";
 import paper from "paper";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import PauseCircleOutlineIcon from "@mui/icons-material/PauseCircleOutline";
 import AllInclusiveIcon from "@mui/icons-material/AllInclusive";
@@ -11,6 +11,7 @@ import AnimationIcon from "@mui/icons-material/Animation";
 import IconButton from "@mui/material/IconButton";
 import { theme } from "../../App";
 import { newFrame } from "../LineArt";
+import { Button, Typography } from "@mui/material";
 
 declare global {
   interface Window {
@@ -21,25 +22,22 @@ window.TIME = 0;
 class Metric {
   frame: { height: number; width: number };
   constructor() {
-    this.frame = { height: 35, width: 60 };
+    this.frame = { height: 35, width: window.innerWidth / 7 };
   }
 }
 const metric = new Metric();
-function clamp(n: number, min: number, max: number) {
-  if (n > max) {
-    return max;
-  } else if (n < min) {
-    return min;
-  } else {
-    return n;
-  }
-}
+// function clamp(n: number, min: number, max: number) {
+//   if (n > max) {
+//     return max;
+//   } else if (n < min) {
+//     return min;
+//   } else {
+//     return n;
+//   }
+// }
 
 function DopeSheet() {
   const [frames, setFrames] = useState(window.FRAME_LAYER.children);
-  const x_max = (window.innerWidth - metric.frame.width) / 2;
-  const x_min = x_max - metric.frame.width * (frames.length - 1);
-  const [x, setx] = useState(x_max);
   const [active, setActive] = useState(0);
   const [onionSkin, setOnionSkin] = React.useState(true);
   const [loopingAnimation, setLoopingAnimation] = React.useState(false);
@@ -61,7 +59,7 @@ function DopeSheet() {
   };
   useEffect(() => {
     window.dispatchEvent(window.onToolCancellation);
-    frames.forEach((frame) => {
+    window.FRAME_LAYER.children.forEach((frame) => {
       frame.visible = false;
     });
     const activeFrame = frames[active];
@@ -79,14 +77,12 @@ function DopeSheet() {
         if (prev)
           prev.set({
             visible: true,
-            blendMode: "multiply",
             strokeColor: "red",
           });
 
         if (next)
           next.set({
             visible: true,
-            blendMode: "multiply",
             strokeColor: "green",
           });
       }
@@ -94,61 +90,47 @@ function DopeSheet() {
       activeFrame.set({ visible: true, strokeColor: "black" });
     }
   }, [active, onionSkin, loopingAnimation, frames]);
-
-  //dragging & scrolling the frames
-  const dragLast = useRef(0);
-  const scroll_sensitivity = 2;
-
-  const handleScrollStart = (e: React.TouchEvent) => {
-    dragLast.current = e.touches[0].clientX;
-  };
-  const handleScrollMove = (e: React.TouchEvent) => {
-    const value =
-      scroll_sensitivity * (x + e.touches[0].clientX - dragLast.current) - x;
-    dragLast.current = e.touches[0].clientX;
-    setx(clamp(value, x_min, x_max));
-  };
-  useEffect(() => {
-    if (!playing) {
-      const checkActive = (index: number) => {
-        const left = -(index + 0.5) * metric.frame.width;
-        const right = -(index - 0.5) * metric.frame.width;
-        const rel_x = x - x_max;
-        return rel_x > left && rel_x < right;
-      };
-      const getActive = () => {
-        let new_active = 0;
-        for (let i = 0; i < frames.length; i++) {
-          if (checkActive(i)) {
-            new_active = i;
-            break;
-          }
-        }
-        return new_active;
-      };
-      setActive(getActive());
-    }
-  }, [playing, x, x_max, frames.length]);
   return (
     <Paper style={{ paddingBottom: 5, background: theme.palette.grey[200] }}>
       <div
-        onTouchStart={handleScrollStart}
-        onTouchMove={handleScrollMove}
         style={{
           background: theme.palette.grey[300],
-          padding: 2,
         }}
       >
         <div
+          onScroll={(e) => {
+            // console.log(e);
+            //@ts-ignore
+            const x = e.target.scrollLeft + metric.frame.width / 2;
+            if (!playing) {
+              setActive(Math.floor(x / metric.frame.width));
+            }
+          }}
           style={{
             display: "flex",
-            transform: `translateX(${x}px)`,
+            overflowX: "scroll",
             opacity: playing ? 0.4 : 1,
           }}
         >
+          <div style={{ minWidth: metric.frame.width }}></div>
+          <div style={{ minWidth: metric.frame.width }}></div>
+          <div style={{ minWidth: metric.frame.width }}></div>
           {frames.map((frame, i) => {
-            return <Frame active={active === i} index={i} />;
+            return (
+              <Frame
+                active={active === i}
+                onClick={() => {
+                  if (!playing) {
+                    setActive(i);
+                  }
+                }}
+                index={i}
+              />
+            );
           })}
+          <div style={{ minWidth: metric.frame.width }}></div>
+          <div style={{ minWidth: metric.frame.width }}></div>
+          <div style={{ minWidth: metric.frame.width }}></div>
         </div>
       </div>
       <Menu
@@ -162,22 +144,24 @@ function DopeSheet() {
         setOnionSkin={setOnionSkin}
         frames={frames}
         setFrames={setFrames}
-        setx={setx}
-        x_max={x_max}
       />
     </Paper>
   );
 }
-function Frame(props: { active: boolean; index: number }) {
-  const margin = 2;
-  const padding = 3;
+function Frame(props: { active: boolean; onClick: Function; index: number }) {
+  const margin = 1;
+  const padding = 1;
   const width = metric.frame.width - 2 * (margin + padding);
   const height = metric.frame.height;
   return (
-    <Paper
+    <Button
+      onClick={(e) => {
+        props.onClick();
+      }}
       style={{
         userSelect: "none",
         margin: margin,
+        marginBottom: height / 5,
         height: height,
         paddingLeft: padding,
         paddingRight: padding,
@@ -188,8 +172,8 @@ function Frame(props: { active: boolean; index: number }) {
           : theme.palette.secondary.main,
       }}
     >
-      {props.index}
-    </Paper>
+      <Typography color={"white"}>{props.index}</Typography>
+    </Button>
   );
 }
 
@@ -204,8 +188,6 @@ function Menu(props: {
   setFrames: React.Dispatch<React.SetStateAction<paper.Item[]>>;
   onionSkin: boolean;
   setOnionSkin: React.Dispatch<React.SetStateAction<boolean>>;
-  setx: React.Dispatch<React.SetStateAction<number>>;
-  x_max: number;
 }) {
   const iconSize = "large";
   const style = {
@@ -255,7 +237,6 @@ function Menu(props: {
           if (props.frames[props.active])
             props.setFrames(window.FRAME_LAYER.children.slice());
           props.setActive(props.active + 1);
-          props.setx(-(props.active + 1) * metric.frame.width + props.x_max);
         }}
       >
         <AddCircleOutlineIcon fontSize={iconSize} />
@@ -268,7 +249,6 @@ function Menu(props: {
           }
           props.setFrames(window.FRAME_LAYER.children.slice());
           props.setActive(props.active + 1);
-          props.setx(-(props.active + 1) * metric.frame.width + props.x_max);
         }}
       >
         <ContentCopyIcon fontSize={iconSize} />
@@ -285,7 +265,6 @@ function Menu(props: {
             Math.min(props.frames.length - 1, props.active - 1)
           );
           props.setActive(newActive);
-          props.setx(-newActive * metric.frame.width + props.x_max);
           props.setFrames(window.FRAME_LAYER.children.slice());
         }}
       >
