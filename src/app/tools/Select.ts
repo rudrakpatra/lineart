@@ -33,9 +33,8 @@ export default class Select extends Tool {
   }
   selectAtPoint(point: paper.Point) {
     const hit = window.ACTIVE_FRAME.hitTest(point, {
-      segments: true,
-      stroke: true,
-      tolerance: 30 / paper.view.zoom,
+      fill: true,
+      tolerance: 4 / paper.view.zoom,
     });
     if (hit) {
       if (hit.type === "stroke" || hit.type === "segment") {
