@@ -7,7 +7,12 @@ import ButtonGroup from "@mui/material/ButtonGroup";
 // import { mdiResize } from "@mdi/js";
 // import { mdiLayersTriple } from "@mdi/js";
 // import { mdiVectorSquareEdit } from "@mdi/js";
-// import { mdiSelectionEllipse } from "@mdi/js";
+import {
+  mdiArrowUpLeft,
+  mdiCursorPointer,
+  mdiSelect,
+  mdiSelectionEllipse,
+} from "@mdi/js";
 
 // import { mdiPalette } from "@mdi/js";
 import { mdiVectorBezier } from "@mdi/js";
@@ -17,49 +22,49 @@ import Icon from "@mdi/react";
 import { theme } from "../App";
 import ToolManager from "./tools/ToolManager";
 
-import Draw from "./tools/Draw";
-import Bezier from "./tools/Bezier";
-import TwoFingerPanZoom from "./tools/TwoFingerPanZoom";
 import paper from "paper";
+
+import TwoFingerPanZoom from "./tools/TwoFingerPanZoom";
+import Bezier from "./tools/Bezier";
+import Select from "./tools/Select";
 declare global {
   interface Window {
     TOOLMANAGER: ToolManager;
     TOOLS: ToolList;
+    LINECOLOR: paper.Color;
   }
 }
 class ToolList {
-  draw: Draw;
   bezier: Bezier;
+  select: Select;
   twoFingerPanZoom: TwoFingerPanZoom;
   constructor() {
-    this.draw = new Draw();
     this.bezier = new Bezier();
+    this.select = new Select();
     this.twoFingerPanZoom = new TwoFingerPanZoom();
   }
 }
 window.TOOLMANAGER = new ToolManager();
 window.TOOLS = new ToolList();
+window.LINECOLOR = new paper.Color("#243e4a");
 export default function Tools() {
   const tools = window.TOOLS;
-  window.TOOLMANAGER.active = [tools.draw, tools.twoFingerPanZoom];
+  window.TOOLMANAGER.active = [tools.select, tools.twoFingerPanZoom];
   const items = [
     // new Item(mdiDragVariant, () => {}),
     // new Item(mdiResize, () => {}),
     // new Item(mdiLayersTriple, () => {}),
-    // new Item(mdiSelectionEllipse, () => {
-    //   select.activate();
-    // }),
+    new Item(mdiCursorPointer, () => {
+      tools.select.setup();
+      window.dispatchEvent(window.onToolCancellation);
+      window.TOOLMANAGER.active = [tools.select, tools.twoFingerPanZoom];
+    }),
     // // new Item(mdiVectorSquareEdit, () => {
     // //   edit.activate();
     // // }),
-
-    new Item(mdiDraw, () => {
-      paper.project.deselectAll();
-      window.dispatchEvent(window.onToolCancellation);
-      window.TOOLMANAGER.active = [tools.draw, tools.twoFingerPanZoom];
-    }),
     new Item(mdiVectorBezier, () => {
       window.dispatchEvent(window.onToolCancellation);
+      tools.bezier.setup();
       window.TOOLMANAGER.active = [tools.bezier, tools.twoFingerPanZoom];
     }),
     // new Item(mdiPalette, () => {}),

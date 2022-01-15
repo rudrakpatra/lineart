@@ -5,6 +5,7 @@ export class Tool {
     //@ts-ignore
     toolManager.active = this;
   }
+  setup() {}
   /**called when some action forces the tool to stop */
   onCancellation() {}
   /**called once when a pointer touches to surface */

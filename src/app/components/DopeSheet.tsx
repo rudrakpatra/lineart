@@ -109,7 +109,7 @@ function DopeSheet() {
           style={{
             display: "flex",
             overflowX: "scroll",
-            opacity: playing ? 0.4 : 1,
+            opacity: playing ? 0.5 : 1,
           }}
         >
           <div style={{ minWidth: metric.frame.width }}></div>
@@ -118,6 +118,7 @@ function DopeSheet() {
           {frames.map((frame, i) => {
             return (
               <Frame
+                key={i}
                 active={active === i}
                 onClick={() => {
                   if (!playing) {
@@ -197,8 +198,8 @@ function Menu(props: {
     marginDown: 2,
     margin: 5,
     borderRadius: 6,
-    background: theme.palette.grey[300],
-  };
+    background: theme.palette.primary,
+  } as unknown as React.CSSProperties;
   return (
     <div
       style={{

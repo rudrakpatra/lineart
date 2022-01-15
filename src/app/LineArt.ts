@@ -8,6 +8,7 @@ declare global {
     UPDATE: {
       undoRedo?: Function;
     };
+    SELECTION?: paper.Item;
   }
 }
 

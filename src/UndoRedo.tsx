@@ -32,7 +32,7 @@ function UndoRedo() {
         }}
         disabled={!undo}
       >
-        <Icon path={mdiUndoVariant} size={1} />
+        <Icon path={mdiUndoVariant} size={1.5} />
       </IconButton>
       <IconButton
         style={style}
@@ -46,7 +46,7 @@ function UndoRedo() {
         }}
         disabled={!redo}
       >
-        <Icon path={mdiRedoVariant} size={1} />
+        <Icon path={mdiRedoVariant} size={1.5} />
       </IconButton>
     </div>
   );
