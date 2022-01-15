@@ -37,7 +37,7 @@ export default class Select extends Tool {
       tolerance: 4 / paper.view.zoom,
     });
     if (hit) {
-      if (hit.type === "stroke" || hit.type === "segment") {
+      if (hit.item) {
         window.ACTIVE_FRAME.selected = false;
         const item = hit.item;
         item.selected = true;
