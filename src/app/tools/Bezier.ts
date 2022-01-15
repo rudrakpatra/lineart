@@ -122,7 +122,7 @@ export default class Bezier extends Tool {
       if (this.path?.visible && this.path?.fullySelected) {
         const [pt1, pt2] = this.path.segments;
         const length = pt2.point.subtract(pt1.point).length;
-        if (length == 0) this.cancelPath();
+        if (length === 0) this.cancelPath();
         else {
           this.path.data.confirmed = true;
           this.path.selectedColor = null;

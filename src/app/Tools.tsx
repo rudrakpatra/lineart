@@ -7,16 +7,10 @@ import ButtonGroup from "@mui/material/ButtonGroup";
 // import { mdiResize } from "@mdi/js";
 // import { mdiLayersTriple } from "@mdi/js";
 // import { mdiVectorSquareEdit } from "@mdi/js";
-import {
-  mdiArrowUpLeft,
-  mdiCursorPointer,
-  mdiSelect,
-  mdiSelectionEllipse,
-} from "@mdi/js";
+import { mdiCursorPointer } from "@mdi/js";
 
 // import { mdiPalette } from "@mdi/js";
 import { mdiVectorBezier } from "@mdi/js";
-import { mdiDraw } from "@mdi/js";
 
 import Icon from "@mdi/react";
 import { theme } from "../App";
